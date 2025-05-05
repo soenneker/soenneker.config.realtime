@@ -1,4 +1,4 @@
-# Contributing to Soenneker.Config.Realtime
+﻿# Contributing to Soenneker.Config.Realtime
 
 We're excited that you're interested in contributing!
 
