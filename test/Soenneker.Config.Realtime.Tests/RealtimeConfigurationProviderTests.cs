@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Soenneker.Config.Realtime.Abstract;
 using Soenneker.Tests.FixturedUnit;
