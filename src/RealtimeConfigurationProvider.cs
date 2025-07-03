@@ -9,7 +9,7 @@ using Soenneker.Extensions.String;
 namespace Soenneker.Config.Realtime;
 
 /// <inheritdoc cref="IRealtimeConfigurationProvider"/>
-public class RealtimeConfigurationProvider : ConfigurationProvider, IRealtimeConfigurationProvider
+public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IRealtimeConfigurationProvider
 {
     private readonly ConcurrentDictionary<string, string?> _data = new();
 

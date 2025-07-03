@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 namespace Soenneker.Config.Realtime;
 
 /// <inheritdoc cref="IRealtimeConfigurationProvider"/>
-public class RealtimeConfigurationSource : IConfigurationSource
+public sealed class RealtimeConfigurationSource : IConfigurationSource
 {
     private readonly IRealtimeConfigurationProvider _provider;
 
