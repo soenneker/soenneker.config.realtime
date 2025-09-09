@@ -21,7 +21,7 @@ public class Fixture : UnitFixture
     {
         services.AddLogging(builder =>
         {
-            builder.AddSerilog(dispose: true);
+            builder.AddSerilog(dispose: false);
         });
 
         string directory = Directory.GetCurrentDirectory();
