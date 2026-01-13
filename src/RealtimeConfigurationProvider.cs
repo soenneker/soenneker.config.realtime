@@ -10,7 +10,13 @@ namespace Soenneker.Config.Realtime;
 /// <inheritdoc cref="IRealtimeConfigurationProvider"/>
 public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IRealtimeConfigurationProvider
 {
-    private readonly ConcurrentDictionary<string, string?> _data = new();
+    // Configuration keys are typically case-insensitive.
+    private static readonly StringComparer _comparer = StringComparer.OrdinalIgnoreCase;
+
+    // ":" currently, but treat as a single char for faster IndexOf and checks.
+    private const char _delimiter = ':';
+
+    private readonly ConcurrentDictionary<string, string?> _data = new(_comparer);
 
     public override bool TryGet(string key, out string? value) => _data.TryGetValue(key, out value);
 
@@ -52,16 +58,17 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
 
     public override IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
     {
-        // Config keys are typically case-insensitive. Also faster/more deterministic than CurrentCulture comparisons.
-        StringComparer comparer = StringComparer.OrdinalIgnoreCase;
-
         // Root: merge earlierKeys + all keys, then sort.
         if (parentPath.IsNullOrEmpty())
         {
-            var list = new List<string>();
+            int capacity = 0;
 
             if (earlierKeys is ICollection<string> ekCol)
-                list.Capacity = ekCol.Count + _data.Count;
+                capacity += ekCol.Count;
+
+            capacity += _data.Count;
+
+            var list = capacity > 0 ? new List<string>(capacity) : new List<string>();
 
             foreach (string k in earlierKeys)
                 list.Add(k);
@@ -69,45 +76,64 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
             foreach (string k in _data.Keys)
                 list.Add(k);
 
-            list.Sort(comparer);
+            list.Sort(_comparer);
             return list;
         }
 
-        // Non-root: find immediate children under parentPath.
-        string prefix = string.Concat(parentPath, ConfigurationPath.KeyDelimiter);
-        int prefixLen = prefix.Length;
+        // Non-root: find immediate children under parentPath WITHOUT allocating "parentPath + ':'".
+        int parentLen = parentPath!.Length;
 
         // Deduplicate child segments.
-        var children = new HashSet<string>(comparer);
+        HashSet<string>? children = null;
 
         foreach (string fullKey in _data.Keys)
         {
-            if (!fullKey.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            // Must be at least "parent:" + 1 char.
+            if (fullKey.Length <= parentLen)
                 continue;
 
-            // child is the segment right after "parentPath:"
-            if (prefixLen >= fullKey.Length)
+            // Starts with parentPath (ignore-case) and next char is delimiter.
+            if (!fullKey.StartsWith(parentPath, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            int nextDelimiter = fullKey.IndexOf(ConfigurationPath.KeyDelimiter, prefixLen);
-            string child = nextDelimiter < 0 ? fullKey.Substring(prefixLen) : fullKey.Substring(prefixLen, nextDelimiter - prefixLen);
+            if (fullKey[parentLen] != _delimiter)
+                continue;
 
-            if (child.Length != 0)
-                children.Add(child);
+            int segmentStart = parentLen + 1;
+
+            // child is the segment right after "parent:"
+            if (segmentStart >= fullKey.Length)
+                continue;
+
+            int nextDelimiter = fullKey.IndexOf(_delimiter, segmentStart);
+            string child = nextDelimiter < 0 ? fullKey.Substring(segmentStart) : fullKey.Substring(segmentStart, nextDelimiter - segmentStart);
+
+            if (child.Length == 0)
+                continue;
+
+            children ??= new HashSet<string>(_comparer);
+            children.Add(child);
         }
 
-        var result = new List<string>();
-
+        // If no matches, we still need to return earlierKeys sorted (per ConfigurationProvider contract expectations).
+        int resultCapacity = 0;
         if (earlierKeys is ICollection<string> ek)
-            result.Capacity = ek.Count + children.Count;
+            resultCapacity += ek.Count;
+        if (children is { Count: > 0 })
+            resultCapacity += children.Count;
+
+        var result = resultCapacity > 0 ? new List<string>(resultCapacity) : new List<string>();
 
         foreach (string k in earlierKeys)
             result.Add(k);
 
-        foreach (string child in children)
-            result.Add(child);
+        if (children is not null)
+        {
+            foreach (string child in children)
+                result.Add(child);
+        }
 
-        result.Sort(comparer);
+        result.Sort(_comparer);
         return result;
     }
 }
