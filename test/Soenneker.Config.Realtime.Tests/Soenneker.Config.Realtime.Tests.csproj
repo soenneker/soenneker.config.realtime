@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Config.Realtime.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Config.Realtime\Soenneker.Config.Realtime.csproj" />
     </ItemGroup>
 
     <ItemGroup>
