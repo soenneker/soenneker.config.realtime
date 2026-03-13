@@ -45,6 +45,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
-        <PackageReference Include="Soenneker.Extensions.Configuration" Version="4.0.803" />
+        <PackageReference Include="Soenneker.Extensions.Configuration" Version="4.0.804" />
     </ItemGroup>
 </Project>
