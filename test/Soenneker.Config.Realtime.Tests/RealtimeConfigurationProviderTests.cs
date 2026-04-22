@@ -1,24 +1,23 @@
 using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Soenneker.Config.Realtime.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Config.Realtime.Tests;
 
-[Collection("Collection")]
-public class RealtimeConfigurationProviderTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class RealtimeConfigurationProviderTests : HostedUnitTest
 {
     private readonly IRealtimeConfigurationProvider _provider;
     private readonly IConfiguration _config;
 
-    public RealtimeConfigurationProviderTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public RealtimeConfigurationProviderTests(Host host) : base(host)
     {
         _provider = Resolve<IRealtimeConfigurationProvider>(true);
         _config = Resolve<IConfiguration>();
     }
 
-    [Fact]
+    [Test]
     public void Set_should_set_on_configuration()
     {
         string? oldValue = _config["key"];
