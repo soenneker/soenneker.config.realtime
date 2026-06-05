@@ -13,6 +13,11 @@ public sealed class RealtimeConfigurationSource : IConfigurationSource
         _provider = provider;
     }
 
+    /// <summary>
+    /// Executes the build operation.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <returns>The result of the operation.</returns>
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
         return _provider;
