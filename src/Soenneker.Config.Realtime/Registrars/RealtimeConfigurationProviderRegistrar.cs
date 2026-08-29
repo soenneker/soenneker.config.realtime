@@ -13,6 +13,8 @@ public static class RealtimeConfigurationProviderRegistrar
     /// <summary>
     /// Adds <see cref="RealtimeConfigurationSource"/> to the <see cref="IConfigurationBuilder"/>. <para/>
     /// </summary>
+    /// <param name="builder">Builder to configure.</param>
+    /// <returns>The resulting realtime Configuration Provider.</returns>
     public static RealtimeConfigurationProvider AddRealtimeConfiguration(this IConfigurationBuilder builder)
     {
         var provider = new RealtimeConfigurationProvider();
@@ -27,6 +29,9 @@ public static class RealtimeConfigurationProviderRegistrar
     /// <summary>
     /// Adds <see cref="IRealtimeConfigurationProvider"/> as a singleton service. <para/>
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <param name="provider">Provider for the add realtime configuration provider as singleton operation.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddRealtimeConfigurationProviderAsSingleton(this IServiceCollection services, RealtimeConfigurationProvider provider)
     {
         services.TryAddSingleton<IRealtimeConfigurationProvider>(provider);
@@ -38,6 +43,9 @@ public static class RealtimeConfigurationProviderRegistrar
     /// Adds <see cref="RealtimeConfigurationProvider"/> to the <see cref="IConfigurationBuilder"/>
     /// and registers it as a singleton service in the <see cref="IServiceCollection"/>.
     /// </summary>
+    /// <param name="services">Service collection that receives the registration.</param>
+    /// <param name="builder">Builder to configure.</param>
+    /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddRealtimeConfiguration(this IServiceCollection services, IConfigurationBuilder builder)
     {
         // Create the provider
