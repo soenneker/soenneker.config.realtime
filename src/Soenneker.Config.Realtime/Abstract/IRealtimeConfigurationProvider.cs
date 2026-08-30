@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Soenneker.Config.Realtime.Abstract;
 
 /// <summary>
-/// A configuration provider allowing for realtime modification
+/// Provides process-local, thread-safe configuration values that can be changed at runtime.
 /// </summary>
 public interface IRealtimeConfigurationProvider : IConfigurationProvider
 {
@@ -17,23 +17,23 @@ public interface IRealtimeConfigurationProvider : IConfigurationProvider
     new bool TryGet(string key, out string? value);
 
     /// <summary>
-    /// Sets the value.
+    /// Sets a value and publishes a configuration reload notification when it changes.
     /// </summary>
     /// <param name="key">Key used to locate the target entry.</param>
     /// <param name="value">Configuration value to publish; null removes the key.</param>
     new void Set(string key, string? value);
 
     /// <summary>
-    /// Removes realtime Configuration Provider for the Realtime Configuration Provider.
+    /// Removes a value and publishes a configuration reload notification when the key existed.
     /// </summary>
     /// <param name="key">Key used to locate the target entry.</param>
     void Remove(string key);
 
     /// <summary>
-    /// Gets child keys.
+    /// Returns immediate child key segments beneath a configuration path.
     /// </summary>
-    /// <param name="earlierKeys">earlier Keys to process.</param>
-    /// <param name="parentPath">Path of the parent to use.</param>
-    /// <returns>The requested collection.</returns>
+    /// <param name="earlierKeys">Child keys supplied by providers earlier in the configuration pipeline.</param>
+    /// <param name="parentPath">The parent configuration path, or null for root keys.</param>
+    /// <returns>The merged child keys in configuration key order.</returns>
     new IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath);
 }

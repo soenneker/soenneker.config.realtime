@@ -22,6 +22,12 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
 
     public override void Set(string key, string? value)
     {
+        if (value is null)
+        {
+            Remove(key);
+            return;
+        }
+
         // Avoid AddOrUpdate delegate allocations and avoid OnReload() if unchanged.
         while (true)
         {
@@ -74,7 +80,10 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
                 list.Add(k);
 
             foreach (string k in _data.Keys)
-                list.Add(k);
+            {
+                int delimiter = k.IndexOf(_delimiter);
+                list.Add(delimiter < 0 ? k : k.Substring(0, delimiter));
+            }
 
             list.Sort(_comparer);
             return list;

@@ -34,7 +34,7 @@ public static class RealtimeConfigurationProviderRegistrar
     /// <returns>The same service collection, so additional registrations can be chained.</returns>
     public static IServiceCollection AddRealtimeConfigurationProviderAsSingleton(this IServiceCollection services, RealtimeConfigurationProvider provider)
     {
-        services.TryAddSingleton<IRealtimeConfigurationProvider>(provider);
+        services.Replace(ServiceDescriptor.Singleton<IRealtimeConfigurationProvider>(provider));
 
         return services;
     }
@@ -56,7 +56,7 @@ public static class RealtimeConfigurationProviderRegistrar
         builder.Add(source);
 
         // Register the provider in DI
-        services.TryAddSingleton<IRealtimeConfigurationProvider>(provider);
+        services.Replace(ServiceDescriptor.Singleton<IRealtimeConfigurationProvider>(provider));
 
         return services;
     }

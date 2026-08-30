@@ -3,67 +3,70 @@
 [![](https://img.shields.io/nuget/dt/soenneker.config.realtime.svg?style=for-the-badge)](https://www.nuget.org/packages/soenneker.config.realtime/)
 [![](https://img.shields.io/github/actions/workflow/status/soenneker/soenneker.config.realtime/codeql.yml?label=CodeQL&style=for-the-badge)](https://github.com/soenneker/soenneker.config.realtime/actions/workflows/codeql.yml)
 
-# ![](https://user-images.githubusercontent.com/4441470/224455560-91ed3ee7-f510-4041-a8d2-3fc093025112.png) Soenneker.Config.Realtime
+# Soenneker.Config.Realtime
 
-### Real-time, thread-safe configuration updates for .NET applications.
+Adds a process-local, mutable configuration provider whose changes publish standard .NET configuration reload notifications.
 
-## Features
-
-- **Real-Time Updates**: Dynamically add, update, or remove configuration values at runtime.
-- **Thread-Safe**: Safe updates in multi-threaded environments.
-- **Hierarchical Keys**: Supports nested keys using `:` as a separator (e.g., `AppSettings:FeatureFlag`).
-- **Automatic Propagation**: Updates are reflected in `IConfiguration` consumers.
-
----
-
-## Installation
+## Install
 
 ```bash
 dotnet add package Soenneker.Config.Realtime
 ```
 
-You just need access to `IServiceCollection` and `IBuilderConfiguration`:
+## Register with an application
+
+Add the provider after the configuration sources it should override:
 
 ```csharp
-serviceCollection.AddRealtimeConfiguration(builderConfiguration);
-```
+using Soenneker.Config.Realtime.Registrars;
 
-This is just one example:
-
-```csharp
 var builder = WebApplication.CreateBuilder(args);
 
-// Add and register the RealtimeConfigurationProvider in one step
 builder.Services.AddRealtimeConfiguration(builder.Configuration);
 
 var app = builder.Build();
 ```
 
-## Usage
+This adds one provider to `builder.Configuration` and registers that same instance as `IRealtimeConfigurationProvider`.
+
+Outside dependency injection, add the source directly and retain the returned provider:
 
 ```csharp
-public class MyService
+IRealtimeConfigurationProvider realtime = configurationBuilder.AddRealtimeConfiguration();
+IConfigurationRoot configuration = configurationBuilder.Build();
+```
+
+## Update values
+
+```csharp
+using Soenneker.Config.Realtime.Abstract;
+
+public sealed class FeatureControl(IRealtimeConfigurationProvider realtime)
 {
-    private readonly IRealtimeConfigurationProvider _configProvider;
-    private readonly IConfiguration _config;
+    public void EnableCheckout() => realtime.Set("Features:Checkout", "true");
 
-    // Simply inject IRealtimeConfigurationProvider:
-    public MyService(IRealtimeConfigurationProvider configProvider, IConfiguration config)
-    {
-        _configProvider = configProvider;
-        _config = config;
-    }
-
-    public void SetKeyDynamically()
-    {
-        // Make your updates
-        _configProvider.Set("SomeKey", "SomeValue");
-    }
-
-    public void ReadUpdatedValue()
-    {
-        // IConfiguration is now updated
-        string newValue = _config["SomeKey"]; // Outputs: "SomeValue"
-    }
+    public void RemoveOverride() => realtime.Remove("Features:Checkout");
 }
 ```
+
+Keys are case-insensitive and use the normal `:` hierarchy delimiter. `Set` publishes a reload only when the effective value in this provider changes. Passing `null` removes the key. `Remove` does nothing when the key is absent.
+
+Because this provider is added last in the examples, its values override earlier JSON, environment-variable, and command-line providers. Removing an override may reveal a value from an earlier provider rather than making the composed configuration value null.
+
+## Observe changes
+
+Read through `IConfiguration` for the latest value. For bound options that should react to reload notifications, use `IOptionsMonitor<T>`:
+
+```csharp
+public sealed class CheckoutWorker(IOptionsMonitor<FeatureOptions> options)
+{
+    public bool IsEnabled => options.CurrentValue.Checkout;
+}
+```
+
+## Operational notes
+
+- Changes exist only in the current process and are lost on restart. The package does not synchronize instances or persist values.
+- Reload callbacks run as part of the configuration notification flow. Keep callbacks short and avoid calling `Set` recursively from them.
+- Values are stored as strings, matching the .NET configuration model. Binding and validation happen in the consuming configuration or options layer.
+- Runtime configuration can contain secrets. Restrict access to the provider and avoid logging values.
