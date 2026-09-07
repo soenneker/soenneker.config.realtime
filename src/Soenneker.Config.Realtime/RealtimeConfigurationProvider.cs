@@ -115,13 +115,13 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
                 continue;
 
             int nextDelimiter = fullKey.IndexOf(_delimiter, segmentStart);
-            string child = nextDelimiter < 0 ? fullKey.Substring(segmentStart) : fullKey.Substring(segmentStart, nextDelimiter - segmentStart);
+            ReadOnlySpan<char> child = nextDelimiter < 0 ? fullKey.AsSpan(segmentStart) : fullKey.AsSpan(segmentStart, nextDelimiter - segmentStart);
 
             if (child.Length == 0)
                 continue;
 
             children ??= new HashSet<string>(_comparer);
-            children.Add(child);
+            children.GetAlternateLookup<ReadOnlySpan<char>>().Add(child);
         }
 
         // If no matches, we still need to return earlierKeys sorted (per ConfigurationProvider contract expectations).
