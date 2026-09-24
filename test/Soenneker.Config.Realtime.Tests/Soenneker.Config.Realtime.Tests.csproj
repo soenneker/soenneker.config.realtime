@@ -17,13 +17,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Soenneker.Utils.Test" Version="4.0.330" />
         <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.285" />
         <PackageReference Include="TUnit" Version="1.69.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Soenneker.Config.Realtime\Soenneker.Config.Realtime.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AwesomeAssertions" Version="9.6.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.12" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
     </ItemGroup>
 </Project>
 

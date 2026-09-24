@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Soenneker.TestHosts.Unit;
-using Soenneker.Utils.Test;
 using Soenneker.Config.Realtime.Registrars;
 using System.IO;
 
