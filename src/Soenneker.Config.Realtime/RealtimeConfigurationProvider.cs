@@ -67,14 +67,14 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
         // Root: merge earlierKeys + all keys, then sort.
         if (parentPath.IsNullOrEmpty())
         {
-            int capacity = 0;
+            var capacity = 0;
 
             if (earlierKeys is ICollection<string> ekCol)
                 capacity += ekCol.Count;
 
             capacity += _data.Count;
 
-            var list = capacity > 0 ? new List<string>(capacity) : new List<string>();
+            List<string> list = capacity > 0 ? new List<string>(capacity) : new List<string>();
 
             foreach (string k in earlierKeys)
                 list.Add(k);
@@ -125,13 +125,13 @@ public sealed class RealtimeConfigurationProvider : ConfigurationProvider, IReal
         }
 
         // If no matches, we still need to return earlierKeys sorted (per ConfigurationProvider contract expectations).
-        int resultCapacity = 0;
+        var resultCapacity = 0;
         if (earlierKeys is ICollection<string> ek)
             resultCapacity += ek.Count;
         if (children is { Count: > 0 })
             resultCapacity += children.Count;
 
-        var result = resultCapacity > 0 ? new List<string>(resultCapacity) : new List<string>();
+        List<string> result = resultCapacity > 0 ? new List<string>(resultCapacity) : new List<string>();
 
         foreach (string k in earlierKeys)
             result.Add(k);
